@@ -57,6 +57,7 @@ global $pape_policy_uris;
         Identity&nbsp;URL:
         <input type="hidden" name="action" value="verify" />
         <input type="text" name="openid_identifier" value="" />
+
         <p>Optionally, request these PAPE policies:</p>
         <p>
         <?php foreach ($pape_policy_uris as $i => $uri) {

@@ -38,36 +38,56 @@ function run() {
             $success .= '  (XRI CanonicalID: '.$escaped_canonicalID.') ';
         }
 
-        // SReg attributes
         $sreg_resp = Auth_OpenID_SRegResponse::fromSuccessResponse($response);
+
         $sreg = $sreg_resp->contents();
 
-        $success .= "<p>Registros SReg</p>";
-        $success .= "<table>";
         if (@$sreg['email']) {
-            $success .= "<tr><td>email</td><td>".escape($sreg['email'])."</td></tr>";
+            $success .= "  You also returned '".escape($sreg['email']).
+                "' as your email.";
         }
 
         if (@$sreg['nickname']) {
-            $success .= "<tr><td>nickname</td><td>".escape($sreg['nickname'])."</td></tr>";
+            $success .= "  Your nickname is '".escape($sreg['nickname']).
+                "'.";
         }
 
         if (@$sreg['fullname']) {
-            $success .= "<tr><td>fullname</td><td>".escape($sreg['fullname'])."</td></tr>";
+            $success .= "  Your fullname is '".escape($sreg['fullname']).
+                "'.";
         }
-        $success .= "</table>";
 
-        // Attribute Exchange
-        $ax = new Auth_OpenID_AX_FetchResponse();
-        $obj = $ax->fromSuccessResponse($response);
+	$pape_resp = Auth_OpenID_PAPE_Response::fromSuccessResponse($response);
 
-        $success .= "<p>Registros AX</p>";
-        $success .= "<table>";
-        foreach ($obj->data as $key => $value) {
-            $success .= "<tr><td>" . $key . "</td><td>" . $value[0] . "</td></tr>";
-        }
-        $success .= "</table>";
+	if ($pape_resp) {
+            if ($pape_resp->auth_policies) {
+                $success .= "<p>The following PAPE policies affected the authentication:</p><ul>";
 
+                foreach ($pape_resp->auth_policies as $uri) {
+                    $escaped_uri = escape($uri);
+                    $success .= "<li><tt>$escaped_uri</tt></li>";
+                }
+
+                $success .= "</ul>";
+            } else {
+                $success .= "<p>No PAPE policies affected the authentication.</p>";
+            }
+
+            if ($pape_resp->auth_age) {
+                $age = escape($pape_resp->auth_age);
+                $success .= "<p>The authentication age returned by the " .
+                    "server is: <tt>".$age."</tt></p>";
+            }
+
+            if ($pape_resp->nist_auth_level) {
+                $auth_level = escape($pape_resp->nist_auth_level);
+                $success .= "<p>The NIST auth level returned by the " .
+                    "server is: <tt>".$auth_level."</tt></p>";
+            }
+
+	} else {
+            $success .= "<p>No PAPE response was sent by the provider.</p>";
+	}
     }
 
     include 'index.php';

@@ -1,5 +1,5 @@
 <?php
-define("Auth_OpenID_DISABLE_SSL_VERIFYPEER", true);
+
 require_once "common.php";
 session_start();
 
@@ -33,35 +33,6 @@ function run() {
                                      // Optional
                                      array('fullname', 'email'));
 
-    // Create attribute request object
-    // Usage: make($type_uri, $count=1, $required=false, $alias=null)
-    $attribute[] = Auth_OpenID_AX_AttrInfo::make('http://openid.net/schema/contact/internet/email',2,1);
-    $attribute[] = Auth_OpenID_AX_AttrInfo::make('http://openid.net/schema/namePerson/first',1,1);
-    $attribute[] = Auth_OpenID_AX_AttrInfo::make('http://openid.net/schema/namePerson/last',1,1);
-    $attribute[] = Auth_OpenID_AX_AttrInfo::make('http://openid.net/schema/namePerson/friendly',1,1);
-    $attribute[] = Auth_OpenID_AX_AttrInfo::make('http://openid.net/schema/birthDate/birthYear',1,1);
-    $attribute[] = Auth_OpenID_AX_AttrInfo::make('http://openid.net/schema/birthDate/birthMonth',1,1);
-    $attribute[] = Auth_OpenID_AX_AttrInfo::make('http://openid.net/schema/birthDate/birthday',1,1);
-    $attribute[] = Auth_OpenID_AX_AttrInfo::make('http://openid.net/schema/gender',1,1);
-    $attribute[] = Auth_OpenID_AX_AttrInfo::make('http://openid.net/schema/contact/phone/home',1,1);
-    $attribute[] = Auth_OpenID_AX_AttrInfo::make('http://openid.net/schema/contact/phone/cell',1,1);
-    $attribute[] = Auth_OpenID_AX_AttrInfo::make('http://openid.net/schema/contact/postaladdress/home',1,1);
-    $attribute[] = Auth_OpenID_AX_AttrInfo::make('http://openid.net/schema/contact/city/home',1,1);
-    $attribute[] = Auth_OpenID_AX_AttrInfo::make('http://openid.net/schema/contact/state/home',1,1);
-    $attribute[] = Auth_OpenID_AX_AttrInfo::make('http://openid.net/schema/contact/country/home',1,1);
-    $attribute[] = Auth_OpenID_AX_AttrInfo::make('http://openid.net/schema/contact/postalcode/home',1,1);
-
-    // Create AX fetch request
-    $ax = new Auth_OpenID_AX_FetchRequest;
-
-    // Add attributes to AX fetch request
-    foreach($attribute as $attr){
-        $ax->add($attr);
-    }
-
-    // Add AX fetch request to authentication request
-    $auth_request->addExtension($ax);
-
     if ($sreg_request) {
         $auth_request->addExtension($sreg_request);
     }
@@ -84,8 +55,7 @@ function run() {
     // form to send a POST request to the server.
     if ($auth_request->shouldSendRedirect()) {
         $redirect_url = $auth_request->redirectURL(getTrustRoot(),
-                                                   getReturnTo(),
-                                                   $immediate = true);
+                                                   getReturnTo());
 
         // If the redirect URL can't be built, display an error
         // message.
@@ -99,7 +69,7 @@ function run() {
         // Generate form markup and render it.
         $form_id = 'openid_message';
         $form_html = $auth_request->htmlMarkup(getTrustRoot(), getReturnTo(),
-                                               true, array('id' => $form_id));
+                                               false, array('id' => $form_id));
 
         // Display an error if the form markup couldn't be generated;
         // otherwise, render the HTML.
